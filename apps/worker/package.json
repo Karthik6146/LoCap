@@ -1,0 +1,27 @@
+{
+  "name": "@clipx/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/bootstrap.ts",
+    "start": "tsx src/bootstrap.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@clipx/ai": "*",
+    "@clipx/captions": "*",
+    "@clipx/database": "*",
+    "@clipx/storage": "*",
+    "@clipx/types": "*",
+    "@clipx/video-engine": "*"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}

@@ -1,0 +1,67 @@
+# Dependencies
+node_modules/
+.venv-whisper/
+.venv-transcription/
+.models/
+__pycache__/
+*.pyc
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+.next/
+.next-check/
+out/
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+
+# Prisma
+packages/database/prisma/dev.db
+packages/database/prisma/dev.db-journal
+packages/database/migrations/*/migration_lock.toml
+
+# Storage / uploads
+storage/
+uploads/
+tmp/
+*.mp4
+*.mov
+*.webm
+*.mkv
+*.wav
+!packages/video-engine/test/fixtures/*.mp4
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Coverage
+coverage/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Local env backups
+*.local
+
+# Local tooling and generated review output
+artifacts/
+.claude/
+.superpowers/
+.next-verify/
+*.db
+*.db-journal
+apps/worker/test-*.ts
+PROJECT_OVERVIEW.md

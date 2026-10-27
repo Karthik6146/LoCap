@@ -1,0 +1,59 @@
+# LoCap local development infrastructure.
+# Postgres + Redis + MinIO (S3-compatible object storage).
+# Start with:  docker compose -f infra/docker-compose.yml up -d
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: clipx-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: clipx
+      POSTGRES_PASSWORD: clipx
+      POSTGRES_DB: clipx
+    ports:
+      - "5432:5432"
+    volumes:
+      - clipx-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clipx -d clipx"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: clipx-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - clipx-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    container_name: clipx-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: clipx
+      MINIO_ROOT_PASSWORD: clipxsecret
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web console
+    volumes:
+      - clipx-minio:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  clipx-postgres:
+  clipx-redis:
+  clipx-minio:

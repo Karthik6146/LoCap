@@ -1,0 +1,387 @@
+// ClipX database schema — PostgreSQL.
+// Models mirror spec section 45. The core MVP models (User, Project, Video,
+// Transcript, TranscriptWord, Clip, ClipSegment, Caption, CaptionStyle, Export,
+// RenderJob, Timeline*) are fully used; the rest scaffold the roadmap.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// NOTE: Local dev uses SQLite so the app runs with zero external services.
+// For production, switch `provider` to "postgresql" and set DATABASE_URL to a
+// Postgres instance (see infra/docker-compose.yml). String columns are used for
+// JSON payloads so the schema runs unchanged on both engines.
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------- Auth
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String?
+  name          String?
+  image         String?
+  emailVerified DateTime?
+  role          String   @default("user") // user | admin
+  plan          String   @default("FREE") // FREE | CREATOR | PRO | BUSINESS
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  projects       Project[]
+  subscriptions  Subscription[]
+  usageRecords   UsageRecord[]
+  brandKits      BrandKit[]
+  exports        Export[]
+  socialAccounts SocialAccount[]
+  scheduledPosts ScheduledPost[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------- Billing
+model Subscription {
+  id          String   @id @default(cuid())
+  userId      String
+  plan        String
+  status      String   @default("active")
+  startsAt    DateTime @default(now())
+  endsAt      DateTime?
+  stripeId    String?
+  razorpayId  String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+
+model UsageRecord {
+  id          String   @id @default(cuid())
+  userId      String
+  metric      String // processingMinutes | storageBytes | aiClips | exportResolution | translationMinutes
+  amount      Float
+  metadata    String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------- Projects
+model Project {
+  id         String   @id @default(cuid())
+  userId     String
+  name       String
+  description String?
+  status     String   @default("draft") // draft | processing | ready | error
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videos   Video[]
+  clips    Clip[]
+  exports  Export[]
+  timeline Timeline?
+  renders  RenderJob[]
+  scheduledPosts ScheduledPost[]
+
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------- Video
+model Video {
+  id              String   @id @default(cuid())
+  projectId       String
+  originalFilename String
+  sourceKey       String
+  audioKey        String?
+  proxyKey        String?
+  thumbnailKey    String?
+  metadata        String?
+  status          String   @default("uploaded") // uploaded | probing | extracting | transcribing | analyzing | ready | error
+  error           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  transcript Transcript?
+  clips     Clip[]
+  renders   RenderJob[]
+  captions  Caption[]
+
+  @@index([projectId])
+}
+
+// ---------------------------------------------------------------- Transcript
+model Transcript {
+  id         String   @id @default(cuid())
+  videoId    String   @unique
+  language   String   @default("en")
+  script     String   @default("hi-latn")
+  duration   Float
+  confidence Float
+  data       String? // raw provider payload (sentences, silences, diarization)
+
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  words TranscriptWord[]
+}
+
+model TranscriptWord {
+  id           String   @id @default(cuid())
+  transcriptId String
+  index        Int
+  text         String
+  start        Float
+  end          Float
+  confidence   Float
+  speakerId    String?
+  isFiller     Boolean  @default(false)
+  sentenceStart Boolean @default(false)
+
+  transcript Transcript @relation(fields: [transcriptId], references: [id], onDelete: Cascade)
+
+  @@index([transcriptId])
+  @@unique([transcriptId, index])
+}
+
+// ---------------------------------------------------------------- Clips
+model Clip {
+  id          String   @id @default(cuid())
+  projectId   String
+  videoId     String
+  title       String
+  duration    Float
+  aspect      String   @default("9:16")
+  scores      String?
+  thumbnailKey String?
+  proxyKey    String?
+  status      String   @default("draft") // draft | processing | ready | exporting | error
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project  Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  video    Video         @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  segments ClipSegment[]
+  captions Caption[]
+  exports  Export[]
+
+  @@index([projectId])
+}
+
+model ClipSegment {
+  id          String @id @default(cuid())
+  clipId      String
+  sourceStart Float
+  sourceEnd   Float
+  timelineStart Float
+  timelineEnd   Float
+
+  clip Clip @relation(fields: [clipId], references: [id], onDelete: Cascade)
+
+  @@index([clipId])
+}
+
+// ---------------------------------------------------------------- Captions
+model CaptionStyle {
+  id        String   @id @default(cuid())
+  name      String
+  category  String
+  isBuiltin Boolean  @default(false)
+  data      String? // CaptionStyle object
+  createdAt DateTime @default(now())
+}
+
+model Caption {
+  id       String @id @default(cuid())
+  clipId   String?
+  videoId  String?
+  script   String @default("hi-latn")
+  text     String
+  start    Float
+  end      Float
+  grouping String @default("auto")
+  order    Int
+  styleId  String
+  words    String // CaptionWord[]
+  data     String?
+
+  clip   Clip?   @relation(fields: [clipId], references: [id], onDelete: Cascade)
+  video  Video?   @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@index([clipId])
+  @@index([videoId])
+}
+
+// ---------------------------------------------------------------- Timeline
+model Timeline {
+  id        String   @id @default(cuid())
+  projectId String   @unique
+  duration  Float
+  data      String? // Timeline object (tracks + items)
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tracks  TimelineTrack[]
+}
+
+model TimelineTrack {
+  id         String @id @default(cuid())
+  timelineId String
+  kind       String
+  name       String
+  data       String?
+  timeline   Timeline @relation(fields: [timelineId], references: [id], onDelete: Cascade)
+  items      TimelineItem[]
+}
+
+model TimelineItem {
+  id         String @id @default(cuid())
+  trackId    String
+  kind       String
+  start      Float
+  end        Float
+  data       String?
+  track      TimelineTrack @relation(fields: [trackId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------- Media / Brand
+model MediaAsset {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  kind      String // source | broll | image | music | sfx | overlay
+  name      String
+  key       String
+  mimeType  String?
+  sizeBytes Int?
+  metadata  String?
+  createdAt DateTime @default(now())
+}
+
+model BrandKit {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  data      String?
+  createdAt DateTime @default(now())
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------- Export / Jobs
+model Export {
+  id        String   @id @default(cuid())
+  projectId String
+  clipId    String?
+  userId    String
+  platform  String
+  settings  String
+  outputKey String?
+  status    String   @default("queued") // queued | rendering | ready | failed
+  progress  Float    @default(0)
+  error     String?
+  createdAt DateTime @default(now())
+  completedAt DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  clip    Clip?   @relation(fields: [clipId], references: [id], onDelete: SetNull)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model RenderJob {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  videoId   String
+  clipId    String?
+  type      String   @default("pipeline") // pipeline | render | caption | reframe
+  status    String   @default("queued") // queued | probing | extracting | transcribing | analyzing | cutting | reframing | rendering | uploading | completed | failed
+  progress  Float    @default(0)
+  message   String   @default("")
+  outputKey String?
+  error     String?
+  input     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  video   Video   @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------- Social
+model SocialAccount {
+  id         String   @id @default(cuid())
+  userId     String
+  platform   String
+  providerAccountId String
+  accessToken String?
+  refreshToken String?
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ScheduledPost {
+  id          String   @id @default(cuid())
+  userId      String
+  projectId   String
+  platform    String
+  accountId   String
+  scheduledFor DateTime
+  caption     String
+  hashtags    String
+  thumbnailKey String?
+  status      String   @default("scheduled") // scheduled | published | failed
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
