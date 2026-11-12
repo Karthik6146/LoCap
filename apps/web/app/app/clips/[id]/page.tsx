@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Spinner, Card } from '@/components/ui';
+import { Spinner } from '@/components/ui';
 import Link from 'next/link';
+import { AlertCircle, ArrowLeft, Download, Film } from 'lucide-react';
 
 interface Clip {
   id: string;
@@ -48,11 +49,11 @@ export default function ClipPage({ params }: { params: { id: string } }) {
 
   if (!clip) {
     return (
-      <Card className="p-12 text-center space-y-4">
-        <div className="text-5xl">😕</div>
-        <h3 className="text-white font-semibold">Clip not found</h3>
-        <Link className="btn btn-ghost" href="/app/projects">Back to projects</Link>
-      </Card>
+      <div className="workspace-empty">
+        <AlertCircle size={24} strokeWidth={1.5} aria-hidden="true" className="mx-auto mb-4 text-gray-500" />
+        <h3 className="text-gray-100 mb-6">Clip not found</h3>
+        <Link className="btn btn-secondary" href="/app/projects">Back to projects</Link>
+      </div>
     );
   }
 
@@ -64,17 +65,20 @@ export default function ClipPage({ params }: { params: { id: string } }) {
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white">{clip.title}</h1>
-          <p className="text-sm text-gray-400 mt-1">
-            {clip.duration.toFixed(1)}s • {clip.aspect}
+          <h1 className="font-display text-3xl font-medium tracking-tight text-gray-100">{clip.title}</h1>
+          <p className="text-sm text-gray-500 mt-1 tabular">
+            {clip.duration.toFixed(1)}s · {clip.aspect}
           </p>
         </div>
-        <Link className="btn btn-ghost" href={`/app/projects/${clip.projectId}`}>← Back to project</Link>
+        <Link className="btn btn-text shrink-0" href={`/app/projects/${clip.projectId}`}>
+          <ArrowLeft size={16} strokeWidth={1.5} aria-hidden="true" />
+          Back to project
+        </Link>
       </div>
 
       {videoUrl ? (
         <div className="space-y-4">
-          <div className="aspect-[9/16] max-h-[70vh] rounded-xl bg-black overflow-hidden mx-auto">
+          <div className="aspect-[9/16] max-h-[70vh] rounded-2xl bg-black overflow-hidden mx-auto">
             <video
               src={videoUrl}
               controls
@@ -83,20 +87,23 @@ export default function ClipPage({ params }: { params: { id: string } }) {
             />
           </div>
           <div className="flex gap-3">
-            <a className="btn btn-primary" href={videoUrl} download target="_blank" rel="noreferrer">Download captioned video</a>
-            <Link className="btn btn-ghost" href="/app/projects">All projects</Link>
+            <a className="btn btn-primary" href={videoUrl} download target="_blank" rel="noreferrer">
+              <Download size={16} strokeWidth={1.5} aria-hidden="true" />
+              Download captioned video
+            </a>
+            <Link className="btn btn-secondary" href="/app/projects">All projects</Link>
           </div>
           <p className="text-xs text-gray-500">
             New clips export their own captioned render; MVP clips play the full captioned video.
           </p>
         </div>
       ) : (
-        <Card className="p-12 text-center space-y-4">
-          <div className="text-5xl">🎬</div>
-          <h3 className="text-white font-semibold">No video yet</h3>
-          <p className="text-gray-400 text-sm">This clip has no rendered output yet.</p>
+        <div className="workspace-empty">
+          <Film size={24} strokeWidth={1.5} aria-hidden="true" className="mx-auto mb-4 text-gray-500" />
+          <h3 className="text-gray-100">No video yet</h3>
+          <p>This clip has no rendered output yet</p>
           <Link className="btn btn-primary" href="/app/projects">Back to projects</Link>
-        </Card>
+        </div>
       )}
     </div>
   );

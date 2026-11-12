@@ -3,7 +3,10 @@ import { getCurrentUser } from '@/lib/session';
 import { captionDocument, captionRevision } from '@/lib/captions';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import CaptionEditor from './editor';
+
+const steps = ['Review', 'Style', 'Preview', 'Export'];
 
 export default async function CaptionsPage({ params }: { params: { videoId: string } }) {
   const user = await getCurrentUser();
@@ -15,10 +18,14 @@ export default async function CaptionsPage({ params }: { params: { videoId: stri
   if (!video) notFound();
   const meta = JSON.parse(video.metadata ?? '{}');
   const provider = JSON.parse(video.transcript?.data ?? '{}');
-  return <div className="mx-auto max-w-[1720px] space-y-5">
-    <div className="flex flex-wrap justify-between gap-3">
-      <div><p className="studio-kicker">Review → Style → Preview → Export</p><h1 className="text-3xl font-display font-bold mt-2 mb-1">Caption studio</h1><p className="text-gray-400 break-all">{video.originalFilename}</p></div>
-      <Link className="btn btn-ghost" href={'/app/projects/' + video.projectId}>Back to project</Link>
+  return <div className="space-y-5">
+    <div>
+      <ol className="studio-kicker flex flex-wrap gap-2" aria-label="Caption steps">{steps.map((s, i) => <li key={s} aria-current={i === 0 ? 'step' : undefined} className={i === 0 ? 'text-gray-100' : undefined}>{i > 0 && <span aria-hidden="true" className="mr-2">·</span>}{s}</li>)}</ol>
+      <div className="mt-2 mb-1 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-display font-medium">Caption studio</h1>
+        <Link className="btn btn-secondary" href={'/app/projects/' + video.projectId}><ArrowLeft size={16} strokeWidth={1.5} aria-hidden="true" />Back to project</Link>
+      </div>
+      <p className="text-gray-400 break-all">{video.originalFilename}</p>
     </div>
     {provider.demo && <p role="status" className="card p-4 text-yellow-300">These are old sample captions. On the project page, choose “Generate captions from audio” to replace them with speech from your video.</p>}
     {provider.diagnostics && <p className="text-sm text-gray-300">Captions were created from your audio. {provider.diagnostics.fallbackWords > 0 ? `${provider.diagnostics.fallbackWords} words have estimated timing, so check them before exporting.` : 'Check spelling and names before exporting.'}</p>}

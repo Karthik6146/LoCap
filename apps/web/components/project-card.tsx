@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ArrowUpRight, Video } from 'lucide-react';
 import { DeleteProjectButton } from './ui';
 
 type Project = {
@@ -26,7 +27,7 @@ export function ProjectCard({ project }: { project: Project }) {
     <Link href={href} className="project-card-link" aria-label={`Edit project ${project.name}`}>
       <div className="project-card-media">
         {thumbnail ? <img src={thumbnail} alt={`Preview of ${project.name}`} loading="lazy" /> : <div className="project-card-placeholder" aria-hidden="true">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><rect x="3" y="4" width="18" height="16" rx="4" /><path d="m10 8 6 4-6 4Z" /></svg>
+          <Video size={18} strokeWidth={1.5} aria-hidden="true" />
           <span>{video ? 'Preview unavailable' : 'Add your first video'}</span>
         </div>}
         <span className={`project-status project-status-${project.status}`}><span aria-hidden="true" />{status}</span>
@@ -39,7 +40,7 @@ export function ProjectCard({ project }: { project: Project }) {
       </div>
     </Link>
     <div className="project-card-footer">
-      <Link href={href} aria-label={`Open project ${project.name}`}>Open project <span aria-hidden="true">↗</span></Link>
+      <Link href={href} aria-label={`Open project ${project.name}`}>Open project <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden="true" /></Link>
       <DeleteProjectButton projectId={project.id} projectName={project.name} />
     </div>
   </article>;

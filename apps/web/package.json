@@ -10,7 +10,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test:browser": "node --import tsx test/browser.mjs",
-    "test:render": "node --import tsx test/render-check.mjs"
+    "test:render": "node --import tsx test/render-check.mjs",
+    "export:launch": "node scripts/export-launch.mjs"
   },
   "dependencies": {
     "@clipx/ai": "*",
@@ -20,6 +21,8 @@
     "@clipx/storage": "*",
     "@clipx/types": "*",
     "@clipx/video-engine": "*",
+    "lucide-react": "^1.72.0",
+    "motion": "^14.13.0",
     "next": "^14.2.15",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

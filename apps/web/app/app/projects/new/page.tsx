@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { GenerationSettings } from '@/components/generation-options';
 import type { GenerationOptions } from '@clipx/types';
 import { useRouter } from 'next/navigation';
-import { Button, Input, Card, CardContent, Spinner } from '@/components/ui';
+import { Button, Input, Card } from '@/components/ui';
+import { Check, FileVideo, Loader2, Upload } from 'lucide-react';
 
 export default function NewProjectPage() {
   const router = useRouter();
@@ -104,6 +105,22 @@ export default function NewProjectPage() {
     }
   }
 
+  const bar = (label: string) => (
+    <div
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={progress}
+      className="h-2 bg-surface2 rounded-full overflow-hidden"
+    >
+      <div
+        className="h-full w-full origin-left bg-primary transition-transform duration-300 motion-reduce:transition-none"
+        style={{ transform: `scaleX(${progress / 100})` }}
+      />
+    </div>
+  );
+
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       {/* Step indicator */}
@@ -114,28 +131,27 @@ export default function NewProjectPage() {
           <li key={s} className="flex items-center gap-2" aria-current={i === current ? 'step' : undefined}>
             <span
               aria-hidden="true"
-              className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                i === current ? 'bg-primary text-[#03241b]' : i < current ? 'bg-primary/20 text-primary' : 'bg-surface2 text-gray-400'
+              className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium tabular-nums ${
+                i === current ? 'bg-primary text-bg' : i < current ? 'bg-surface2 text-gray-100' : 'bg-surface2 text-gray-500'
               }`}
             >
-              {i < current ? '✓' : i + 1}
+              {i < current ? <Check size={16} strokeWidth={1.5} aria-hidden="true" /> : i + 1}
             </span>
-            <span className={i === current ? 'text-white font-medium' : 'text-gray-400'}>{s}<span className="sr-only">{i < current ? ' (done)' : ''}</span></span>
-            {i < 2 && <span aria-hidden="true" className="h-0.5 w-8 sm:w-12 bg-border" />}
+            <span className={i === current ? 'text-gray-100 font-medium' : 'text-gray-400'}>{s}<span className="sr-only">{i < current ? ' (done)' : ''}</span></span>
+            {i < 2 && <span aria-hidden="true" className="h-px w-8 sm:w-12 bg-border" />}
           </li>
         ); })}
       </ol>
 
       {step === 'name' && (
-        <Card>
-          <CardContent>
+        <Card className="p-5">
            <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); if (name.trim()) setStep('upload'); }}>
             <div className="text-center">
-              <h1 className="font-display text-2xl font-bold text-white">New Project</h1>
-              <p className="text-gray-400">Give your project a name, then upload a video.</p>
+              <h1 className="font-display text-3xl font-medium tracking-tight text-gray-100">New project</h1>
+              <p className="text-gray-400 mt-2">Give your project a name, then upload a video</p>
             </div>
             <div>
-              <label htmlFor="name" className="label">Project Name</label>
+              <label htmlFor="name" className="label">Project name</label>
               <Input
                 id="name"
                 value={name}
@@ -147,23 +163,21 @@ export default function NewProjectPage() {
             <Button type="submit" className="w-full" disabled={!name.trim()}>
               Continue
             </Button>
-            <p className="text-sm text-gray-400 text-center">Next you&apos;ll upload a video (MP4, MOV, WEBM or MKV, up to 2 GB). Captions are generated automatically.</p>
+            <p className="text-sm text-gray-500 text-center">Next you&apos;ll upload a video (MP4, MOV, WEBM or MKV, up to 2 GB). Captions are generated automatically.</p>
            </form>
-          </CardContent>
         </Card>
       )}
 
       {step === 'upload' && (
-        <Card>
-          <CardContent className="space-y-6">
+        <Card className="p-5 space-y-6">
             <div className="text-center">
-              <h1 className="font-display text-2xl font-bold text-white">Upload Video</h1>
-              <p className="text-gray-400">Drag & drop or click to select. MP4, MOV, WEBM, MKV — up to 2 GB.</p>
+              <h1 className="font-display text-3xl font-medium tracking-tight text-gray-100">Upload video</h1>
+              <p className="text-gray-400 mt-2">Drag and drop or click to select. MP4, MOV, WEBM or MKV, up to 2 GB.</p>
             </div>
 
             <div
-              className={`border-2 border-dashed rounded-2xl p-8 text-center transition-colors ${
-                dragActive ? 'border-primary bg-primary/5' : 'border-border'
+              className={`border border-dashed rounded-2xl px-5 py-8 text-center transition-colors ${
+                dragActive ? 'border-gray-500 bg-surface2' : 'border-gray-700'
               }`}
               onDragEnter={onDrag}
               onDragLeave={onDrag}
@@ -180,61 +194,52 @@ export default function NewProjectPage() {
               <label htmlFor="file-input" className="cursor-pointer">
                 {file ? (
                   <div className="space-y-2">
-                    <div className="text-5xl">🎬</div>
-                    <p className="font-medium text-white">{file.name}</p>
-                    <p className="text-sm text-gray-400">{(file.size / 1024 / 1024).toFixed(1)} MB</p>
-                    <Button variant="ghost" size="sm" onClick={() => setFile(null)}>
+                    <FileVideo size={16} strokeWidth={1.5} aria-hidden="true" className="mx-auto text-gray-400" />
+                    <p className="font-medium text-gray-100 truncate" title={file.name}>{file.name}</p>
+                    <p className="text-sm text-gray-400 tabular-nums">{(file.size / 1024 / 1024).toFixed(1)} MB</p>
+                    <Button variant="text" size="sm" onClick={() => setFile(null)}>
                       Remove
                     </Button>
                   </div>
                 ) : (
                   <>
-                    <div className="text-5xl mb-2">📁</div>
-                    <p className="text-white font-medium">Drop video here or click to browse</p>
-                    <p className="text-sm text-gray-500 mt-1">MP4, MOV, WEBM, MKV • Max 2 GB</p>
+                    <Upload size={16} strokeWidth={1.5} aria-hidden="true" className="mx-auto mb-3 text-gray-400" />
+                    <p className="text-gray-100 font-medium">Drop video here or click to browse</p>
+                    <p className="text-sm text-gray-500 mt-1">MP4, MOV, WEBM, MKV · Max 2 GB</p>
                   </>
                 )}
               </label>
             </div>
 
-            {error && <div className="p-3 rounded-lg bg-error/10 border border-error/30 text-error text-sm">{error}</div>}
+            {error && <div role="alert" className="p-4 rounded-xl bg-error/10 border border-error/30 text-red-300 text-sm">{error}</div>}
 
             <GenerationSettings value={settings} onChange={setSettings} />
-            <p className="text-xs text-gray-400">Transcribed locally from your audio. Review names and spellings before exporting.</p>
+            <p className="text-xs text-gray-500">Transcribed locally from your audio. Review names and spellings before exporting.</p>
             <Button className="w-full" onClick={handleUpload} disabled={!file || uploading} loading={uploading}>
               {uploading ? 'Uploading…' : 'Generate captions'}
             </Button>
 
             {uploading && (
               <div className="space-y-2">
-                <div className="h-2 bg-surface2 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-                <p className="text-sm text-gray-500 text-center">{progress}%</p>
+                {bar('Upload progress')}
+                <p className="text-sm text-gray-500 text-center tabular-nums">{progress}%</p>
               </div>
             )}
-          </CardContent>
         </Card>
       )}
 
       {step === 'processing' && (
-        <Card>
-          <CardContent className="space-y-6 text-center">
-            <Spinner size="lg" className="mx-auto text-primary" />
-            <h2 className="font-display text-xl font-bold text-white">Processing your video</h2>
-            <p className="text-gray-400">This usually takes a few minutes. We'll redirect you when it's done.</p>
-            <div className="h-2 bg-surface2 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
+        <Card className="p-5 space-y-6 text-center">
+            <div>
+              <h2 className="font-display text-3xl font-medium tracking-tight text-gray-100">Processing your video</h2>
+              <p className="text-gray-400 mt-2">This usually takes a few minutes. We&apos;ll redirect you when it&apos;s done.</p>
             </div>
-            <p role="status" className="text-sm text-gray-300">{progress}% - {jobMessage}</p>
-            {error && <div role="alert" className="text-red-300">{error}<a className="btn btn-ghost" href={"/app/projects/" + projectId}>Open project to retry</a></div>}
-          </CardContent>
+            {bar('Processing progress')}
+            <p role="status" className="flex items-center justify-center gap-2 text-sm text-gray-400 tabular-nums">
+              {!error && <Loader2 size={16} strokeWidth={1.5} aria-hidden="true" className="shrink-0 motion-safe:animate-spin" />}
+              {progress}% · {jobMessage}
+            </p>
+            {error && <div role="alert" className="space-y-4 text-sm text-red-300"><p>{error}</p><a className="btn-secondary" href={"/app/projects/" + projectId}>Open project to retry</a></div>}
         </Card>
       )}
     </div>
