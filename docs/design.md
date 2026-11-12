@@ -1,19 +1,26 @@
 # Design System
 
 ## Direction
-The current UI is a dark, creator-focused dashboard for video work. It uses a compact application shell with a rounded desktop navigation, mobile drawer, sticky header, project/clip views, upload states, and media previews. There is a separate landing page at `/`.
+Unslop redesign (2026-11-13). Character: punchy, exact, quick; world: a night edit bay. Chrome is quiet graphite; color lives in the video thumbnails, the caption preview and the template cards. Each screen has one mint primary action. Signature: the lit active word (`.lit-word`, mint block with dark text, taken from the logo mark), used only on the logo, the active nav dot, the studio's current-word readout, the selected template and the launch hero headline.
+
+`/` redirects to `/app`. The public launch page lives at `/launch` (motion set: HeroArt word field, HeroHeadline, TiltCard, ScriptTicker, scroll-drawn Pipeline, template autoplay, Reveal, FooterWordmark; all off under reduced motion) (`apps/web/app/launch`, sections in `apps/web/components/launch`). It is built only, never deployed, and uses synthetic demo content only.
 
 ## Tokens
-Defined in `apps/web/app/globals.css` and Tailwind config:
-- Background `#080c0b`; surfaces `#101715` and `#18221f`; border `#283730`.
-- Primary mint `#06d6a0`; pale mint accent `#63f5c8`.
-- Semantic colors: success `#22c55e`, warning `#f59e0b`, error `#ef4444`, muted `#9ca3af`.
-- Typography: Inter for body and Space Grotesk for display headings, loaded by `apps/web/app/layout.tsx`.
-- Shared classes include `.card`, `.btn`, `.btn-primary`, `.btn-ghost`, `.btn-accent`, `.input`, and `.label`.
+Defined in `apps/web/app/globals.css` and mapped in `apps/web/tailwind.config.ts`:
+- Graphite ramp: background `#111113`; surfaces `#18181b`, `#1f1f22`, `#29292d` (`surface`, `surface2`, `surface3`); hairline `rgb(237 237 240 / .08)`, strong hairline `/ .16`.
+- Text roles: primary `#ededef`, secondary `#a1a1a8`, muted `#8a8a91`. Tailwind `gray-*` is remapped to this ramp, so `text-gray-100/400/500` are the three roles.
+- Accent: mint `#06d6a0` (`primary`, supports alpha), hover `#34e2b5`, text on mint `#03241b`. Semantic: success `#4cc38a`, warning `#e5a43b`, error `#e5484d`; `red-300/400` are toned to match.
+- Typography: Inter (interface) and Space Grotesk (titles) at weights 400–500, no bold headings, sentence case, tabular figures for counts, durations and timecodes.
+- Radius: `rounded-lg` 8, `rounded-xl` 10 (controls), `rounded-2xl` 16 (cards, panels).
+- Motion: one easing `cubic-bezier(0.22, 1, 0.36, 1)`, 120–500ms, transform and opacity only, one `.enter` fade-rise per page, all off under reduced motion.
+- Shared classes: `.card`, `.btn`, `.btn-primary` (one per screen), `.btn-secondary`/`.btn-ghost`, `.btn-text`, `.input`, `.label`, `.kicker`, `.lit-word`, `.enter`.
+- Icons: `lucide-react` at 16px (18 in navigation), stroke 1.5, text-role color. No emoji or text glyphs as icons. `components/launch/GithubMark.tsx` covers the GitHub brand mark that lucide v1 removed.
+- Number tween: `CountUp` in `components/ui` (`motion/react`).
+- Reference sources for components and motion: React Bits (True Focus, Count Up), Vengeance UI (Stagger Text), Skiper UI (player controls reference). Glow, aurora, spotlight and particle effects from these libraries are out of bounds.
 
 ## Components and layout
 - Reusable primitives live in `apps/web/components/ui`.
-- The authenticated shell is `apps/web/app/app/layout.tsx`; navigation currently covers Dashboard, Projects, AI Clips, and Exports.
+- The authenticated shell is `apps/web/app/app/layout.tsx`; navigation covers Dashboard, Projects, Clips and Exports; the active item shows a small mint square.
 - Pages use Tailwind `sm`, `md`, `lg`, and `xl` breakpoints. Upload supports drag/drop and file selection.
 - Keep cards and controls aligned with the existing rounded, dark surface language unless intentionally redesigning the system.
 

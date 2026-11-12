@@ -65,3 +65,6 @@ artifacts/
 *.db-journal
 apps/worker/test-*.ts
 PROJECT_OVERVIEW.md
+
+# Static export of the /launch page (apps/web/scripts/export-launch.mjs)
+.launch-export/

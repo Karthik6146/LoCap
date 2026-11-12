@@ -230,3 +230,17 @@ pm run lint`: cannot run noninteractively; the pre-existing checkout has no ESLi
 ## Caption accuracy (sub-project B) — on hold (2026-10-21)
 - Spec and plan approved and saved: docs/superpowers/specs/2026-10-21-caption-accuracy-design.md, docs/superpowers/plans/2026-10-21-caption-accuracy.md. Not started: current models work well enough and disk space is short.
 - Measured downloads: torch 2.8.0+cu126 2.92 GB (+ optional cuBLAS 0.55 GB, cuDNN 0.74 GB); Systran/faster-whisper-large-v3 3.09 GB; bjollans/whisper-large-v3-vaani-hindi-ct2 3.09 GB; Oriserve/Whisper-Hindi2Hinglish-Apex 1.62 GB; Oriserve/Whisper-Hindi2Hinglish-Prime 6.18 GB. Recommended set (GPU + Apex + vaani) = 7.6 GB download.
+
+## Unslop redesign and launch page (2026-11-13)
+- [x] App UI polish: graphite token ramp and remapped `gray-*` text roles, one mint primary action per screen, lucide icons replacing emoji and glyphs, weight 400–500 sentence-case type, tabular figures, 4px spacing, nested radii, no glows or gradients, one easing curve. Signature: lit active word (`.lit-word`) in the logo, nav dot, studio current-word readout and selected template. Template tiles reveal words on hover with `motion/react`; dashboard stats use `CountUp`. Added `lucide-react` and `motion` to `@clipx/web`.
+- [x] Launch page at `/launch` (`apps/web/app/launch`, `apps/web/components/launch`): code-built hero demo (Devanagari line converting to Hinglish, timeline with word blocks and karaoke), live 40-template wall using `CaptionOverlay`, Why, How it works, Proof (README figures only), Get started, Roadmap, footer with licence. Synthetic content only; not deployed.
+- [x] Verified in the browser at 1440×900 and 375×812 (no horizontal overflow); `npx tsc --noEmit` in apps/web passes.
+- Limits: build, lint and the Playwright browser/render suites were not re-run. Firefox/Safari and screen readers not tested. `packages/storage` is excluded from git by the `storage/` ignore rule, so a fresh clone cannot resolve `@clipx/storage` (**open**).
+- [x] Static export for GitHub Pages: `npm run export:launch -w @clipx/web` copies only the launch page into `apps/web/.launch-export` (gitignored), builds it with `output: 'export'` and base path `/LoCap` (override with `BASE_PATH`), and writes `.nojekyll`. Verified served under `/LoCap/`: no failed requests, caption fonts load, 40 template tiles hydrate. Publishing to the `gh-pages` branch is done by the user.
+- [x] Launch page motion pass (2026-11-13), all code-drawn from product material and off under reduced motion:
+  - Hero: drifting Hindi/Hinglish word field with karaoke-lit words (`HeroArt`), staggered headline entrance with a mint wipe behind "Hinglish" (`HeroHeadline`), and a demo card that rises in and tilts up to 4° under a fine pointer (`TiltCard`).
+  - `ScriptTicker`: a band where words morph from Devanagari to Roman at the center.
+  - `section-pipeline.tsx`: the How it works steps as a scroll-drawn serpentine path with a travelling waveform chip.
+  - Template wall autoplays one tile at a time while in view. `Reveal` fade-rises section content. `FooterWordmark` is a huge clipped LoCap with a letter-by-letter mint sweep.
+  - Verified hydrated in the browser at 1440 and 375 wide with no overflow. The static export rebuilds.
+  - Limit: section content is hidden until hydration, so no-JS visitors see blank sections.
