@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/images/logo.svg" alt="LoCap logo" width="88" height="88">
+
 # LoCap
 
 **Local-first AI captions for Hinglish, Hindi and English videos.**
