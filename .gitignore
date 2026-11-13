@@ -28,7 +28,7 @@ packages/database/prisma/dev.db-journal
 packages/database/migrations/*/migration_lock.toml
 
 # Storage / uploads
-storage/
+/storage/
 uploads/
 tmp/
 *.mp4
