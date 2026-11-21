@@ -5,7 +5,8 @@ import { CopyButton } from './section-copy-button';
 import { Pipeline } from './section-pipeline';
 import { Reveal } from './Reveal';
 import { FooterWordmark } from './FooterWordmark';
-import { REPO_URL, SECTION, SECTION_LEDE, SECTION_TITLE } from './constants';
+import Link from 'next/link';
+import { LICENSE_URL, NOTICES_URL, REPO_URL, SECTION, SECTION_LEDE, SECTION_TITLE, launchHref } from './constants';
 
 /* Every fact on this page comes from README.md. */
 
@@ -243,31 +244,58 @@ export function Roadmap() {
   );
 }
 
-const FOOTER_LINKS = [
-  { href: '#why', label: 'Why LoCap' },
-  { href: '#templates', label: 'Templates' },
-  { href: '#start', label: 'Get started' },
+type FooterLink = { label: string; href: string };
+const FOOTER_COLUMNS: { title: string; links: FooterLink[] }[] = [
+  { title: 'Product', links: [
+    { label: 'Why LoCap', href: '#why' },
+    { label: 'Templates', href: '#templates' },
+    { label: 'How it works', href: '#how' },
+    { label: 'Get started', href: '#start' },
+  ] },
+  { title: 'Open source', links: [
+    { label: 'Source on GitHub', href: REPO_URL },
+    { label: 'MIT License', href: LICENSE_URL },
+    { label: 'Open source credits', href: '/open-source' },
+    { label: 'Third-party notices', href: NOTICES_URL },
+  ] },
+  { title: 'Legal', links: [
+    { label: 'Privacy', href: '/privacy' },
+    { label: 'Terms', href: '/terms' },
+  ] },
 ];
+
+const FOOTER_LINK = 'text-sm text-gray-400 transition-colors hover:text-gray-100';
+
+function FooterItem({ label, href }: FooterLink) {
+  return href.startsWith('http')
+    ? <a href={href} target="_blank" rel="noreferrer" className={FOOTER_LINK}>{label}</a>
+    : <Link href={launchHref(href)} className={FOOTER_LINK}>{label}</Link>;
+}
 
 export function LaunchFooter() {
   return (
-    <footer className="border-t border-border">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+    <footer className="overflow-hidden border-t border-border">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-x-6 gap-y-12 px-6 pb-12 pt-16 sm:grid-cols-3 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
+        <div className="col-span-2 sm:col-span-3 lg:col-span-1">
           <Logo />
-          <p className="mt-4 max-w-md text-sm leading-6 text-gray-500">
-            Copyright © 2026 Karthik Shakyawar. All rights reserved. Source published for viewing only.
-          </p>
-        </div>
-        <nav aria-label="Footer" className="flex flex-wrap items-center gap-1">
-          {FOOTER_LINKS.map(link => (
-            <a key={link.href} href={link.href} className="flex h-9 items-center rounded-lg px-3 text-sm text-gray-400 transition-colors hover:bg-surface2 hover:text-gray-100">{link.label}</a>
-          ))}
-          <a href={REPO_URL} target="_blank" rel="noreferrer" className="flex h-9 items-center gap-2 rounded-lg px-3 text-sm text-gray-400 transition-colors hover:bg-surface2 hover:text-gray-100">
+          <p className="mt-4 max-w-xs text-sm leading-6 text-gray-400">Local-first, word-timed captions for Hindi, English and Hinglish videos.</p>
+          <a href={REPO_URL} target="_blank" rel="noreferrer" className="mt-6 inline-flex h-9 items-center gap-2 rounded-lg border border-border px-3 text-sm text-gray-400 transition-colors hover:border-gray-700 hover:text-gray-100">
             <GithubMark />
-            GitHub
+            Open source · MIT
           </a>
-        </nav>
+        </div>
+        {FOOTER_COLUMNS.map(column => (
+          <nav key={column.title} aria-label={column.title}>
+            <h2 className="text-sm font-medium text-gray-100">{column.title}</h2>
+            <ul className="mt-4 space-y-3">
+              {column.links.map(link => <li key={link.label}><FooterItem {...link} /></li>)}
+            </ul>
+          </nav>
+        ))}
+      </div>
+      <div className="mx-auto flex max-w-6xl flex-col gap-2 border-t border-border px-6 py-6 text-sm text-gray-500 sm:flex-row sm:items-center sm:justify-between">
+        <p>© 2026 Karthik Shakyawar. Released under the MIT License.</p>
+        <p>Built with open source. Runs on your machine.</p>
       </div>
       <FooterWordmark />
     </footer>

@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { GithubMark } from '@/components/launch/GithubMark';
-import { Logo } from '@/components/ui';
+import { LaunchHeader } from '@/components/launch/LaunchHeader';
 import { HeroArt } from '@/components/launch/HeroArt';
 import { HeroDemo } from '@/components/launch/HeroDemo';
 import { HeroHeadline } from '@/components/launch/HeroHeadline';
@@ -17,31 +16,11 @@ export const metadata: Metadata = {
   description: 'Word-timed captions for Hindi, English and Hinglish videos. Recognition, alignment and Hinglish conversion run on your own machine.',
 };
 
-const NAV = [
-  { href: '#why', label: 'Why LoCap' },
-  { href: '#templates', label: 'Templates' },
-  { href: '#how', label: 'How it works' },
-  { href: '#start', label: 'Get started' },
-];
-
 export default function LaunchPage() {
   return (
     <div className="min-h-screen">
       <a href="#main" className="skip-link">Skip to content</a>
-      <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-6">
-          <Link href="/launch" aria-label="LoCap home"><Logo /></Link>
-          <nav className="hidden items-center gap-1 md:flex" aria-label="Sections">
-            {NAV.map(item => (
-              <a key={item.href} href={item.href} className="flex h-9 items-center rounded-lg px-3 text-sm text-gray-400 transition-colors hover:bg-surface2 hover:text-gray-100">{item.label}</a>
-            ))}
-          </nav>
-          <a href={REPO_URL} className="btn btn-secondary" target="_blank" rel="noreferrer">
-            <GithubMark />
-            <span className="hidden sm:inline">GitHub</span>
-          </a>
-        </div>
-      </header>
+      <LaunchHeader />
 
       <main id="main" tabIndex={-1} className="outline-none">
         <div className="relative isolate overflow-hidden">

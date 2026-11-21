@@ -36,8 +36,8 @@ export function FooterWordmark() {
     return () => { window.clearTimeout(id); setLit(-1); };
   }, [active]);
 
-  return <div ref={ref} aria-hidden="true" className="mx-auto max-w-6xl select-none overflow-hidden px-6">
-    <p className="translate-y-1/4 whitespace-nowrap font-display text-[clamp(96px,22vw,320px)] font-medium leading-none tracking-tighter text-surface3">
+  return <div ref={ref} aria-hidden="true" className="mx-auto max-w-6xl select-none overflow-hidden px-6 text-center">
+    <p className="translate-y-1/4 whitespace-nowrap font-display text-[clamp(96px,24vw,432px)] font-medium leading-[0.8] tracking-tighter text-surface3">
       {LETTERS.map((letter, i) => <motion.span key={i} initial={false}
         animate={{ color: lit === i ? 'var(--primary)' : 'var(--surface3)' }} transition={{ duration: STEP / 1000, ease }}>{letter}</motion.span>)}
     </p>
