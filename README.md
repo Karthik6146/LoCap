@@ -215,8 +215,6 @@ LoCap runs as a single-machine local application. Authentication is a local demo
 
 ## Licence
 
-Copyright © 2026 Karthik Shakyawar. All rights reserved.
-
-This source is published for viewing only. No licence is granted to use, copy, modify or distribute it without written permission.
+LoCap is open source under the [MIT License](LICENSE). Copyright © 2026 Karthik Shakyawar.
 
 Bundled fonts and referenced third-party material keep their own licences; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

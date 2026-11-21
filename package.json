@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "LoCap — AI video clipper + caption editor. Turn long videos into scroll-stopping shorts.",
+  "license": "MIT",
   "workspaces": [
     "apps/*",
     "packages/*"
